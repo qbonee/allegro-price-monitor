@@ -51,21 +51,31 @@ def check_all_products():
     alerts = []
     for file in os.listdir("products"):
         if file.endswith(".json"):
+            print(f"🔍 Przetwarzam plik: {file}")
             with open(os.path.join("products", file)) as f:
                 config = json.load(f)
             product_name = file.replace(".json", "")
             min_price = config["min_price"]
             for offer_id in config["offers"]:
+                print(f"➡️  Sprawdzam ofertę: {offer_id}")
                 price = get_price(offer_id, token)
-                if price is not None and price < min_price:
-                    alerts.append(f"Produkt: {product_name}\nAukcja: https://allegro.pl/oferta/{offer_id}\nCena aktualna: {price:.2f} zł\nMinimalna cena: {min_price:.2f} zł\n")
+                if price is not None:
+                    print(f"📦 Produkt: {product_name}, Aukcja: {offer_id}, Cena: {price}, Min: {min_price}")
+                    if price < min_price:
+                        print("⚠️  Cena poniżej progu! Generuję alert.")
+                        alerts.append(
+                            f"Produkt: {product_name}\n"
+                            f"Aukcja: https://allegro.pl/oferta/{offer_id}\n"
+                            f"Cena aktualna: {price:.2f} zł\n"
+                            f"Minimalna cena: {min_price:.2f} zł\n"
+                        )
+                else:
+                    print(f"❌ Nie udało się pobrać ceny dla aukcji {offer_id}")
 
     if alerts:
         body = "\n\n".join(alerts)
         send_email("Przekroczono minimalną cenę!!!", body)
-        print("Alert wysłany.")
+        print("📨 Alert wysłany na maila.")
     else:
-        print("Wszystkie ceny OK.")
+        print("✅ Wszystkie ceny OK.")
 
-if __name__ == "__main__":
-    check_all_products()
