@@ -78,4 +78,3 @@ def check_all_products():
         print("📨 Alert wysłany na maila.")
     else:
         print("✅ Wszystkie ceny OK.")
-
